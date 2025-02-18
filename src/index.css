@@ -1,0 +1,13 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+body {
+  background-color: #121829;
+  background-image: url(assets/images/Background.png);
+  background-size: cover;
+  font-family: "Poppins";
+}
+.center {
+  width: 1330px;
+}
