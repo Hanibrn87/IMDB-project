@@ -1,5 +1,6 @@
 import { Button } from "flowbite-react";
 import { Link } from "react-router-dom";
+import { useRouteError } from "react-router-dom";
 
 export default function ErrorPage() {
   return (
@@ -8,7 +9,7 @@ export default function ErrorPage() {
         <div className="center my-auto">
           <img
             className="opacity-100 w-10"
-            src="src/assets/images/logo.png"
+            src="../src/assets/images/logo.png"
             alt="logo"
           />
         </div>
@@ -16,7 +17,7 @@ export default function ErrorPage() {
       <div>
         <img
           className="m-auto my-14 w-1/4"
-          src="src/assets/images/Film-rolls-rafiki.svg"
+          src="../src/assets/images/Film-rolls-rafiki.svg"
           alt="404"
         />
       </div>

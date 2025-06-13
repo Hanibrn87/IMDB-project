@@ -1,16 +1,64 @@
 import { ButtonGroup } from "flowbite-react";
-import Genres from "../components/genres";
-import { useLoaderData, useParams } from "react-router-dom";
-import { filterByGenres } from "../api/movies";
+import Genres from "../components/Genres";
+import { useParams } from "react-router-dom";
+import { filterByGenres, getGenres } from "../api/movies";
 import MovieList from "../components/MovieList";
-
-export async function loader({ params }) {
-  const movies = await filterByGenres(params.id);
-  return { movies };
-}
+import { useState, useEffect } from "react";
+import { FaSearch } from "react-icons/fa";
+import InfiniteScroll from "react-infinite-scroll-component";
+import CardSkeleton from "../components/CardSkeleton";
 
 export default function MoviesByGenres() {
-  const { movies } = useLoaderData();
+  const { id } = useParams();
+
+  const [input, setInput] = useState("");
+  const [movies, setMovies] = useState([]);
+  const [filteredMovies, setFilteredMovies] = useState([]);
+  const [page, setPage] = useState(1);
+  const [hasMore, setHasMore] = useState(true);
+  const [isLoading, setIsLoading] = useState(true);
+  const [count, setCount] = useState([]);
+
+  useEffect(() => {
+    setMovies([]);
+    setFilteredMovies([]);
+    setPage(1);
+    setHasMore(true);
+    setIsLoading(true);
+  }, [id]);
+
+  const loadMoreMovies = async (targetPage = page) => {
+    try {
+      const newMovies = await filterByGenres(id, targetPage);
+
+      if (newMovies.length === 0) {
+        setHasMore(false);
+        return;
+      }
+
+      setMovies((prev) => [...prev, ...newMovies]);
+      setFilteredMovies((prev) => [...prev, ...newMovies]);
+      setPage((prev) => prev + 1);
+    } catch (err) {
+      console.error("Error loading movies by genre:", err);
+      setHasMore(false);
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  const handleChange = (value) => {
+    setInput(value);
+    const filtered = movies.filter((movie) =>
+      movie.title.toLowerCase().includes(value.toLowerCase())
+    );
+    setFilteredMovies(filtered);
+  };
+
+  useEffect(() => {
+    getGenres().then((cons) => setCount(cons));
+  }, []);
+
   return (
     <>
       <div className="text-white mt-20 mb-10">
@@ -27,20 +75,47 @@ export default function MoviesByGenres() {
           the movie and TV shows!
         </p>
       </div>
-      <button className="flex mb-9">
-        <img className="m-3" src="src/assets/images/search-normal.png" alt="" />
+
+      <div className="flex mb-9 items-center">
+        <FaSearch className="text-gray-500 m-2" />
         <input
-          label
           type="search"
           placeholder="Search Movies or TV Shows"
-          className="bg-slate-950 bg-opacity-25 text-gray-400 border-2 border-gray-700 rounded-xl focus:border-2 focus:border-opacity-10 w-72 h-14"
+          value={input}
+          onChange={(e) => handleChange(e.target.value)}
+          className="bg-slate-950 bg-opacity-25 text-gray-400 border-2 border-gray-700 rounded-xl focus:border-opacity-10 w-72 h-14"
         />
-      </button>
+      </div>
+
       <ButtonGroup className="bg-black bg-opacity-10 p-2.5 rounded-xl flex flex-wrap justify-between m-auto px-4">
         <Genres />
       </ButtonGroup>
-      {/* <h1>{id}</h1> */}
-      <MovieList movies={movies} />
+
+      <h1 className="text-3xl font-semibold text-gray-500 text mt-6 ml-2">
+        {id}
+        <p className="inline text-lg font-normal">
+          &nbsp;(
+          {
+            count.find((con) => con.name.toLowerCase() === id.toLowerCase())
+              ?.movies_count
+          }
+          )
+        </p>
+      </h1>
+
+      <InfiniteScroll
+        dataLength={filteredMovies.length}
+        next={() => loadMoreMovies()}
+        hasMore={hasMore && input === ""}
+        loader={<div className="flex gap-7"><CardSkeleton cards={4} /></div>}
+        endMessage={
+          <p className="text-gray-600 mt-6 text-center font-light">
+            <b>There are no more movies to load...</b>
+          </p>
+        }
+      >
+        <MovieList movies={filteredMovies} isLoading={isLoading} />
+      </InfiniteScroll>
     </>
   );
 }

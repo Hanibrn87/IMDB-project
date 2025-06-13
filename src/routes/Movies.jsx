@@ -1,7 +1,67 @@
-import Genres from "../components/genres";
+import Genres from "../components/Genres";
 import { ButtonGroup } from "flowbite-react";
+import { getMovies } from "../api/movies";
+import { useState, useEffect } from "react";
+import MovieList from "../components/MovieList";
+import { FaSearch } from "react-icons/fa";
+import InfiniteScroll from "react-infinite-scroll-component";
+import CardSkeleton from "../components/CardSkeleton";
 
 export default function Movies() {
+  const [input, setInput] = useState("");
+  const [result, setResult] = useState([]);
+  const [isLoading, setIsLoading] = useState(true);
+  const [movies, setMovies] = useState([]);
+  const [hasMore, setHasMore] = useState(true);
+  const [page, setPage] = useState(1);
+
+  // const totalPages = Math.ceil((input ? result : movies).length / itemsPerPage);
+
+  // useEffect(() => {
+  //   getMovies()
+  //     .then((movs) => {
+  //       setMovies(movs);
+  //       setVisibleMovies(movs.slice(0, itemsPerLoad));
+  //       setHasMore(movs.length > itemsPerLoad);
+  //       setIsLoading(false);
+  //     })
+  //     .catch(() => setIsLoading(false));
+  // }, []);
+
+  useEffect(() => {
+    loadMoreMovies();
+  }, []);
+
+  const loadMoreMovies = async () => {
+    try {
+      const newMovies = await getMovies(page);
+
+      if (newMovies.length === 0) {
+        setHasMore(false);
+        return;
+      }
+
+      setMovies((prevMovies) => [...prevMovies, ...newMovies]);
+      setPage((prevPage) => prevPage + 1);
+    } catch (err) {
+      console.error("Failed to load movies:", err);
+      setHasMore(false);
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  const handleChange = async (value) => {
+    setInput(value);
+    setIsLoading(true);
+    const allMovies = await getMovies();
+    const filtered = allMovies.filter((movie) =>
+      movie.title.toLowerCase().includes(value.toLowerCase())
+    );
+    setResult(filtered);
+    setIsLoading(false);
+  };
+
   return (
     <>
       <div className="text-white mt-20 mb-10">
@@ -18,18 +78,38 @@ export default function Movies() {
           the movie and TV shows!
         </p>
       </div>
-      <div className="flex mb-9">
-        <img className="m-4 w-6 h-6" src="src/assets/images/search-normal.png" alt="" />
+
+      <div className="flex mb-9 items-center">
+        <FaSearch className="text-gray-500 m-2" id="search-icon" />
         <input
-          label
           type="search"
           placeholder="Search Movies or TV Shows"
-          className="bg-slate-950 bg-opacity-25 text-gray-400 border-2 border-gray-700 rounded-xl focus:border-2 focus:border-opacity-10 w-72 h-14"
+          value={input}
+          onChange={(e) => handleChange(e.target.value)}
+          className="bg-slate-950 bg-opacity-25 text-gray-400 border-2 border-gray-700 rounded-xl focus:border-opacity-10 w-72 h-14"
         />
       </div>
+
       <ButtonGroup className="bg-black bg-opacity-10 p-2.5 rounded-xl flex flex-wrap justify-between m-auto px-4">
         <Genres />
       </ButtonGroup>
+
+      <h1 className="text-3xl font-semibold text-gray-500 text mt-6 ml-2">
+        All
+        <p className="inline text-lg font-normal">&nbsp;(250)</p>
+      </h1>
+      <InfiniteScroll
+        dataLength={movies.length}
+        next={loadMoreMovies}
+        hasMore={hasMore}
+        loader={<div className="flex gap-7"><CardSkeleton cards={4} /></div>}endMessage={
+          <p className="text-gray-600 mt-6 text-center font-light">
+            <b>There are no more movies to load...</b>
+          </p>
+        }
+      >
+        <MovieList movies={movies} isLoading={isLoading} />
+      </InfiniteScroll>
     </>
   );
 }

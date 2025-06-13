@@ -1,6 +1,8 @@
 import { getMovieByName } from "../api/movies";
 import { useLoaderData } from "react-router-dom";
 import { Badge, Rating } from "flowbite-react";
+import Skeleton from "react-loading-skeleton";
+import 'react-loading-skeleton/dist/skeleton.css'
 
 export async function loader({ params }) {
   const movie = await getMovieByName(params.id);
@@ -32,8 +34,8 @@ export default function MovieDetails() {
             className="w-[470px] rounded-3xl"
           />
           <div className="w-[470px]">
-            <h2 className="text-2xl font-medium  text-gray-50">
-              {movie.director}
+            <h2 className="text-2xl font-medium text-gray-50">
+              {movie.director || <Skeleton count={2} width={100} height={20} />}
             </h2>
             <p className="text-gray-400 font-light leading-7 py-6 text-lg">
               {movie.plot}

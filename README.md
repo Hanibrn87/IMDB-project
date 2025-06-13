@@ -1,8 +1,22 @@
-# React + Vite
+# IMDB top 250 Movies
 
-This template provides a minimal setup to get React working in Vite with HMR and some ESLint rules.
+This React project was developed as the final project of the 26th [Coding Front](https://codingfront.dev/) Bootcamp.
+It is built with [Vite](https://vitejs.dev/), styled using [Tailwind CSS](https://tailwindcss.com/), and uses [React Router](https://reactrouter.com/) for routing and [Axios](https://axios-http.com/) for API requests.
 
-Currently, two official plugins are available:
+## How to start?
 
-- [@vitejs/plugin-react](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react/README.md) uses [Babel](https://babeljs.io/) for Fast Refresh
-- [@vitejs/plugin-react-swc](https://github.com/vitejs/vite-plugin-react-swc) uses [SWC](https://swc.rs/) for Fast Refresh
+Write these in the Terminal :
+
+### 1. Clone the repository :
+
+git clone https://github.com/Hanibrn87/final-project.git
+
+### 2. Install dependencies :
+
+npm install
+
+### 3. Running the app :
+
+npm run dev
+
+### And finally, go to the Movies page...

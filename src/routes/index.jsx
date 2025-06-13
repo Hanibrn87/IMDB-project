@@ -2,9 +2,7 @@ import { createBrowserRouter } from "react-router-dom";
 import Root from "./root";
 import ErrorPage from "../error-page/ErrorPage";
 import Movies from "./Movies";
-import MoviesByGenres, {
-  loader as MoviesByGenresloader,
-} from "./MoviesByGenres";
+import MoviesByGenres from "./MoviesByGenres";
 import MovieDetails, { loader as movieLoader } from "./MovieDetails";
 
 const router = createBrowserRouter([
@@ -17,17 +15,12 @@ const router = createBrowserRouter([
         path: "Movies",
         element: <Movies />,
       },
-      // {
-      //   path: "Movies/All",
-      //   element : <AllMovies />
-      // },
       {
-        path: "Movies/:id",
+        path: "Movies/genres/:id",
         element: <MoviesByGenres />,
-        loader: MoviesByGenresloader,
       },
       {
-        path: "Movie/:id",
+        path: "Movies/:id",
         element: <MovieDetails />,
         loader: movieLoader,
       },
