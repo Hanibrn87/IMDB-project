@@ -15,22 +15,15 @@ export default function Movies() {
   const [hasMore, setHasMore] = useState(true);
   const [page, setPage] = useState(1);
 
-  // const totalPages = Math.ceil((input ? result : movies).length / itemsPerPage);
-
-  // useEffect(() => {
-  //   getMovies()
-  //     .then((movs) => {
-  //       setMovies(movs);
-  //       setVisibleMovies(movs.slice(0, itemsPerLoad));
-  //       setHasMore(movs.length > itemsPerLoad);
-  //       setIsLoading(false);
-  //     })
-  //     .catch(() => setIsLoading(false));
-  // }, []);
-
   useEffect(() => {
     loadMoreMovies();
   }, []);
+
+  const removeDuplicates = (movies) => {
+    const map = new Map();
+    movies.forEach((movie) => map.set(movie.id, movie));
+    return Array.from(map.values());
+  };
 
   const loadMoreMovies = async () => {
     try {
@@ -41,7 +34,9 @@ export default function Movies() {
         return;
       }
 
-      setMovies((prevMovies) => [...prevMovies, ...newMovies]);
+      setMovies((prevMovies) =>
+        removeDuplicates([...prevMovies, ...newMovies])
+      );
       setPage((prevPage) => prevPage + 1);
     } catch (err) {
       console.error("Failed to load movies:", err);
@@ -54,10 +49,26 @@ export default function Movies() {
   const handleChange = async (value) => {
     setInput(value);
     setIsLoading(true);
-    const allMovies = await getMovies();
+    
+    let page = 1;
+    let allMovies = [];
+    let keepFetching = true;
+
+    while (keepFetching) {
+      const data = await getMovies(page);
+
+      if (data.length === 0) {
+        keepFetching = false;
+      } else {
+        allMovies = [...allMovies, ...data];
+        page += 1;
+      }
+    }
+
     const filtered = allMovies.filter((movie) =>
       movie.title.toLowerCase().includes(value.toLowerCase())
     );
+
     setResult(filtered);
     setIsLoading(false);
   };
@@ -102,13 +113,21 @@ export default function Movies() {
         dataLength={movies.length}
         next={loadMoreMovies}
         hasMore={hasMore}
-        loader={<div className="flex gap-7"><CardSkeleton cards={4} /></div>}endMessage={
+        loader={
+          <div className="flex gap-7">
+            <CardSkeleton cards={4} />
+          </div>
+        }
+        endMessage={
           <p className="text-gray-600 mt-6 text-center font-light">
             <b>There are no more movies to load...</b>
           </p>
         }
       >
-        <MovieList movies={movies} isLoading={isLoading} />
+        <MovieList
+          movies={input.trim() ? result : movies}
+          isLoading={isLoading}
+        />
       </InfiniteScroll>
     </>
   );
