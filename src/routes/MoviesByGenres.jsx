@@ -25,6 +25,7 @@ export default function MoviesByGenres() {
     setPage(1);
     setHasMore(true);
     setIsLoading(true);
+    loadMoreMovies(1);
   }, [id]);
 
   const loadMoreMovies = async (targetPage = page) => {
@@ -36,9 +37,12 @@ export default function MoviesByGenres() {
         return;
       }
 
-      setMovies((prev) => [...prev, ...newMovies]);
-      setFilteredMovies((prev) => [...prev, ...newMovies]);
-      setPage((prev) => prev + 1);
+      setMovies((prev) => [...(targetPage === 1 ? [] : prev), ...newMovies]);
+      setFilteredMovies((prev) => [
+        ...(targetPage === 1 ? [] : prev),
+        ...newMovies,
+      ]);
+      setPage((prev) => targetPage + 1);
     } catch (err) {
       console.error("Error loading movies by genre:", err);
       setHasMore(false);
@@ -47,12 +51,48 @@ export default function MoviesByGenres() {
     }
   };
 
-  const handleChange = (value) => {
+  const fetchAllMoviesByGenre = async () => {
+    let all = [];
+    let page = 1;
+    let keepFetching = true;
+
+    while (keepFetching) {
+      const data = await filterByGenres(id, page);
+      if (data.length === 0) {
+        keepFetching = false;
+      } else {
+        all = [...all, ...data];
+        page += 1;
+      }
+    }
+
+    return all;
+  };
+
+  const handleChange = async (value) => {
     setInput(value);
-    const filtered = movies.filter((movie) =>
-      movie.title.toLowerCase().includes(value.toLowerCase())
-    );
-    setFilteredMovies(filtered);
+
+    if (value.trim() === "") {
+      setMovies([]);
+      setFilteredMovies([]);
+      setPage(1);
+      setHasMore(true);
+      setIsLoading(true);
+      await loadMoreMovies(1);
+    } else {
+      setIsLoading(true);
+      try {
+        const allMovies = await fetchAllMoviesByGenre();
+        const filtered = allMovies.filter((movie) =>
+          movie.title.toLowerCase().includes(value.toLowerCase())
+        );
+        setFilteredMovies(filtered);
+      } catch (err) {
+        console.error("Search failed:", err);
+      } finally {
+        setIsLoading(false);
+      }
+    }
   };
 
   useEffect(() => {
@@ -107,7 +147,11 @@ export default function MoviesByGenres() {
         dataLength={filteredMovies.length}
         next={() => loadMoreMovies()}
         hasMore={hasMore && input === ""}
-        loader={<div className="flex gap-7"><CardSkeleton cards={4} /></div>}
+        loader={
+          <div className="flex gap-7">
+            <CardSkeleton cards={4} />
+          </div>
+        }
         endMessage={
           <p className="text-gray-600 mt-6 text-center font-light">
             <b>There are no more movies to load...</b>

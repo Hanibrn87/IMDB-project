@@ -1,11 +1,13 @@
 import Genres from "../components/Genres";
 import { ButtonGroup } from "flowbite-react";
 import { getMovies } from "../api/movies";
-import { useState, useEffect } from "react";
+import { useState, useEffect, useCallback } from "react";
 import MovieList from "../components/MovieList";
 import { FaSearch } from "react-icons/fa";
 import InfiniteScroll from "react-infinite-scroll-component";
 import CardSkeleton from "../components/CardSkeleton";
+// import { debounce } from "lodash";
+import debounce from "lodash.debounce";
 
 export default function Movies() {
   const [input, setInput] = useState("");
@@ -46,31 +48,47 @@ export default function Movies() {
     }
   };
 
-  const handleChange = async (value) => {
-    setInput(value);
-    setIsLoading(true);
-    
-    let page = 1;
+  const fetchAllMovies = async (maxPages = 5) => {
     let allMovies = [];
-    let keepFetching = true;
+    let page = 1;
 
-    while (keepFetching) {
+    while (page <= maxPages) {
       const data = await getMovies(page);
-
       if (data.length === 0) {
-        keepFetching = false;
-      } else {
-        allMovies = [...allMovies, ...data];
-        page += 1;
+        break;
       }
+      allMovies = [...allMovies, ...data];
+      page += 1;
     }
 
-    const filtered = allMovies.filter((movie) =>
-      movie.title.toLowerCase().includes(value.toLowerCase())
-    );
+    return allMovies;
+  };
 
-    setResult(filtered);
-    setIsLoading(false);
+  const handleChange = async (value) => {
+    setInput(value);
+
+    if (value.trim() === "") {
+      setResult([]);
+      setHasMore(true);
+      setIsLoading(true);
+      setMovies([]);
+      setPage(1);
+      await loadMoreMovies();
+    } else {
+      setIsLoading(true);
+      try {
+        const allMovies = await fetchAllMovies();
+        const filtered = allMovies.filter((movie) =>
+          movie.title.toLowerCase().includes(value.toLowerCase())
+        );
+        setResult(filtered);
+        setHasMore(false);
+      } catch (err) {
+        console.error("Search failed:", err);
+      } finally {
+        setIsLoading(false);
+      }
+    }
   };
 
   return (
@@ -96,7 +114,9 @@ export default function Movies() {
           type="search"
           placeholder="Search Movies or TV Shows"
           value={input}
-          onChange={(e) => handleChange(e.target.value)}
+          onChange={async (e) => {
+            await handleChange(e.target.value);
+          }}
           className="bg-slate-950 bg-opacity-25 text-gray-400 border-2 border-gray-700 rounded-xl focus:border-opacity-10 w-72 h-14"
         />
       </div>
@@ -112,7 +132,7 @@ export default function Movies() {
       <InfiniteScroll
         dataLength={movies.length}
         next={loadMoreMovies}
-        hasMore={hasMore}
+        hasMore={hasMore && input.trim() === ""}
         loader={
           <div className="flex gap-7">
             <CardSkeleton cards={4} />
