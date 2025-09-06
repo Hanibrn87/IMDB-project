@@ -7,6 +7,7 @@ import GenSkeleton from "./GenSkeleton";
 export default function Genres() {
   const [genres, setGenres] = useState([]);
   const [isLoading, setIsLoading] = useState(true);
+  const [showAll, setShowAll] = useState(false);
   const { id } = useParams();
 
   useEffect(() => {
@@ -19,9 +20,11 @@ export default function Genres() {
       .catch(() => setIsLoading(false));
   }, []);
 
+  const displayedGenres = showAll ? genres : genres.slice(0, 3);
+
   return (
     <>
-      <Link to={`/Movies`}>
+      <Link to={`/`}>
         <Button
           color="dark"
           className={`px-3 m-1 rounded-lg font-semibold ${
@@ -34,22 +37,33 @@ export default function Genres() {
         </Button>
       </Link>
       {isLoading ? (
-        <GenSkeleton genres={11} />
+        <GenSkeleton genres={3} />
       ) : (
-        genres.map((gen) => (
-          <Link to={`/Movies/genres/${gen.name}`} key={gen.id}>
+        <>
+          {displayedGenres.map((gen) => (
+            <Link to={`/genres/${gen.name}`} key={gen.id}>
+              <Button
+                color="dark"
+                className={`px-3 m-1 rounded-lg font-semibold ${
+                  id === gen.name
+                    ? "bg-violet-500 text-gray-900 ring-2 ring-violet-500 hover:text-gray-300"
+                    : "bg-opacity-0 text-gray-400 hover:bg-gray-950 hover:text-white hover:bg-opacity-40"
+                }`}
+              >
+                {gen.name}
+              </Button>
+            </Link>
+          ))}
+          {genres.length > 3 && (
             <Button
               color="dark"
-              className={`px-3 m-1 rounded-lg font-semibold ${
-                id === gen.name
-                  ? "bg-violet-500 text-gray-900 ring-2 ring-violet-500 hover:text-gray-300"
-                  : "bg-opacity-0 text-gray-400 hover:bg-gray-950 hover:text-white hover:bg-opacity-40"
-              }`}
+              onClick={() => setShowAll(!showAll)}
+              className="px-3 m-1 rounded-lg font-semibold bg-opacity-0 text-white hover:bg-gray-950 hover:text-white hover:bg-opacity-40"
             >
-              {gen.name}
+              {showAll ? "Less" : "More"}
             </Button>
-          </Link>
-        ))
+          )}
+        </>
       )}
     </>
   );

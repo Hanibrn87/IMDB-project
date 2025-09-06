@@ -121,7 +121,7 @@ export default function Movies() {
         />
       </div>
 
-      <ButtonGroup className="bg-black bg-opacity-10 p-2.5 rounded-xl flex flex-wrap justify-between m-auto px-4">
+      <ButtonGroup className="bg-black bg-opacity-10 p-2.5 rounded-xl flex flex-wrap justify-between px-4 w-fit">
         <Genres />
       </ButtonGroup>
 

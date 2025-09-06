@@ -7,7 +7,7 @@ export default function Root() {
     <>
       <header className="w-full h-20 bg-gradient-to-l from-gray-900 flex items-center">
         <div className="center m-auto flex flex-row justify-between items-center">
-          <Link to={`/Movies`}>
+          <Link to={`/`}>
             <img
               className="opacity-100 w-12"
               src="../src/assets/images/logo.png"
@@ -15,7 +15,7 @@ export default function Root() {
             />
           </Link>
           <div className="text-gray-500 flex gap-7 text-base font-semibold">
-            <Link className="hover:text-gray-300" as={Link} to={"/"}>
+            {/* <Link className="hover:text-gray-300" as={Link} to={"/"}>
               Home
             </Link>
             <Link
@@ -24,7 +24,7 @@ export default function Root() {
               to={"/Movies"}
             >
               Movies
-            </Link>
+            </Link> */}
           </div>
         </div>
       </header>
@@ -36,8 +36,8 @@ export default function Root() {
         </div>
       </main>
       <Footer.Copyright
-        href="https://codingfront.dev/"
-        by="Coding Front"
+        href="https://github.com/Hanibrn87"
+        by="Hanieh borna"
         year={2025}
         className="my-6"
       />

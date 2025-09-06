@@ -12,11 +12,11 @@ const router = createBrowserRouter([
     errorElement: <ErrorPage />,
     children: [
       {
-        path: "Movies",
+        index: true,
         element: <Movies />,
       },
       {
-        path: "Movies/genres/:id",
+        path: "genres/:id",
         element: <MoviesByGenres />,
       },
       {
