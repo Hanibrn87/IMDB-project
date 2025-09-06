@@ -4,6 +4,7 @@ import ErrorPage from "../error-page/ErrorPage";
 import Movies from "./Movies";
 import MoviesByGenres from "./MoviesByGenres";
 import MovieDetails, { loader as movieLoader } from "./MovieDetails";
+import i18n from "../../i18n";
 
 const router = createBrowserRouter([
   {
